@@ -1,0 +1,99 @@
+import React from 'react'
+import { Link } from 'react-router-dom';
+import { useState,useEffect, useContext } from 'react';
+import { FirebaseContext } from '../Firebase';
+
+const Login = (props) => {
+
+    const {history} = props;
+
+    const firebase = useContext(FirebaseContext);
+    const [email,setEmail] = useState('');
+    const [password,setPassword] = useState('');
+    const [btn,setBtn] = useState(false);
+    const [error, setError] = useState('');
+
+   useEffect(()=>{
+       if(password.length > 5 && email !== '' )
+       {
+         setBtn(true)
+       }else if(btn){
+         setBtn(false)
+       }
+   },[email,password,btn])
+
+   const showBtn = btn ? (
+     <button>Connexion</button>
+   ) : (
+     <button disabled>Connexion</button>
+   );
+
+   const handleSubmit = (e) => {
+      e.preventDefault();
+
+      firebase
+        .loginUser(email, password)
+        .then((user) => {
+          setEmail("");
+          setPassword("");
+          history.push("/welcome");
+        })
+        .catch((error) => {
+          setError(error);
+          setEmail("");
+          setPassword("");
+        });
+   }
+
+//    Gestion des Erreurs Firebase
+    return (
+      <div className="signUpLoginBox">
+        <div className="slContainer">
+          <div className="formBoxLeftLogin"></div>
+          <div className="formBoxRight">
+            <div className="formContent">
+              {error !== "" && <span>{error.message}</span>}
+              <h2>Connexion</h2>
+              <form onSubmit={handleSubmit}>
+                <div className="inputBox">
+                  <input
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
+                    autoFocus
+                    id="email"
+                    type="email"
+                    required
+                    autoComplete="off"
+                  />
+                  <label htmlFor="eamil">Email</label>
+                </div>
+                <div className="inputBox">
+                  <input
+                    onChange={(e) => setPassword(e.target.value)}
+                    value={password}
+                    id="password"
+                    type="password"
+                    required
+                    autoComplete="off"
+                  />
+                  <label htmlFor="password">Password</label>
+                </div>
+                {showBtn}
+              </form>
+              <div className="linkContainer">
+                <Link className="simpleLink" to="/signup">
+                  Nouveau sur Marvel Quiz ? Inscrivez vous maintenant
+                </Link>
+                <br />
+                <Link className="simpleLink" to="/forgetpassword">
+                  Mot de passe Oublier ?
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+}
+
+export default Login
